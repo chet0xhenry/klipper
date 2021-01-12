@@ -85,7 +85,6 @@ class ConfigWrapper:
     def get_prefix_options(self, prefix):
         return [o for o in self.fileconfig.options(self.section)
                 if o.startswith(prefix)]
-
 AUTOSAVE_HEADER = """
 #*# <---------------------- SAVE_CONFIG ---------------------->
 #*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
@@ -95,6 +94,7 @@ AUTOSAVE_HEADER = """
 class PrinterConfig:
     def __init__(self, printer):
         self.printer = printer
+        self.config_files = []
         self.autosave = None
         self.status_raw_config = {}
         self.status_settings = {}
@@ -113,7 +113,10 @@ class PrinterConfig:
             msg = "Unable to open config file %s" % (filename,)
             logging.exception(msg)
             raise error(msg)
+        self.config_files.append(filename)
         return data.replace('\r\n', '\n')
+    def get_config_file_names(self):
+        return self.config_files
     def _find_autosave_data(self, data):
         regular_data = data
         autosave_data = ""

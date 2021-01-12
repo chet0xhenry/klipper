@@ -114,6 +114,7 @@ class ServerSocket:
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.setblocking(0)
         self.sock.bind(server_address)
+        os.chmod(server_address, 0775)
         self.sock.listen(1)
         self.fd_handle = self.reactor.register_fd(
             self.sock.fileno(), self._handle_accept)

@@ -1,18 +1,18 @@
 This document provides information on implementing G-Code command
 sequences in gcode_macro (and similar) config sections.
 
-### G-Code Macro Naming
+### G-Code and Shell Macro Naming
 
-Case is not important for the G-Code macro name - MY_MACRO and
+Case is not important for the G-Code or Shell Exec macro name - MY_MACRO and
 my_macro will evaluate the same and may be called in either upper or
 lower case. If any numbers are used in the macro name then they must
 all be at the end of the name (eg, TEST_MACRO25 is valid, but
 MACRO25_TEST3 is not).
 
-### Formatting of G-Code in the config
+### Formatting of G-Code or Shell Commands in the config
 
 Indentation is important when defining a macro in the config file. To
-specify a multi-line G-Code sequence it is important for each line to
+specify a multi-line sequence it is important for each line to
 have proper indentation. For example:
 
 ```
@@ -21,6 +21,13 @@ gcode:
   SET_PIN PIN=my_led VALUE=1
   G4 P2000
   SET_PIN PIN=my_led VALUE=0
+```
+OR
+```
+[shell_exec take_image_process]
+command:
+  v4l2-ctl --device /dev/video0 --stream-mmap --stream-to=frame.raw --stream-count=1
+  convert -size 1280x720 -depth 16 uyvy:frame.raw frame.png
 ```
 
 Note how the `gcode:` config option always starts at the beginning of
@@ -59,9 +66,9 @@ speed (via the `F` parameter) on the first `G1` command.
 ### Template expansion
 <!-- {% raw %} -->
 
-The gcode_macro `gcode:` config section is evaluated using the Jinja2
-template language. One can evaluate expressions at run-time by
-wrapping them in `{ }` characters or use conditional statements
+The gcode_macro `gcode:` config section and the shell_exec command section
+is evaluated using the Jinja2 template language. One can evaluate expressions
+at run-time by wrapping them in `{ }` characters or use conditional statements
 wrapped in `{% %}`. See the
 [Jinja2 documentation](http://jinja.pocoo.org/docs/2.10/templates/)
 for further information on the syntax.
@@ -75,11 +82,29 @@ pseudo-variable. For example, if the macro:
 gcode:
   M117 Now at { params.VALUE|float * 100 }%
 ```
-
 were invoked as `SET_PERCENT VALUE=.2` it would evaluate to `M117 Now
 at 20%`. Note that parameter names are always in upper-case when
 evaluated in the macro and are always passed as strings. If performing
 math then they must be explicitly converted to integers or floats.
+
+When using template expantion in a shell_exec macro it is important to understand that
+inputs must be quoted properly so that paramaters can not run unintended commands.
+Given a value of "; cat /etc/passwd".  If left unquoted the macro would
+echo the contents of /etc/passwd.
+```
+[shell_exec take_image_process]
+command:
+  echo { params.VALUE }
+```
+
+To mitigate this use the quote Jinja2 filter:
+```
+[shell_exec take_image_process]
+command:
+  echo { params.VALUE | quote}
+```
+
+
 
 An example of a complex macro:
 ```

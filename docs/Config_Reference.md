@@ -1200,6 +1200,52 @@ gcode:
 #   Default is 0.
 ```
 
+
+# Shell exec macros and events
+
+## [shell_exec]
+
+Shell exec macros (one may define any number of sections with a
+"shell_exec" prefix). If a shell exec macro exists in any of the klipper
+config files then those files must be owned and permissioned to prevent 
+edits from unauthorized users.  It is recomended that a new system user
+like "klipper" is created to own those files and run the klippy service.
+See the [shell_exec_install guide](Shell_Exec_Install.md) for more information.
+
+```
+[shell_exec my_cmd]
+#command:
+#   A list of shell commands to execute in place of "my_cmd". See
+#   docs/Command_Templates.md for shell format. This parameter must
+#   be provided.
+#default_parameter_<parameter>:
+#   One may define any number of options with a "default_parameter_"
+#   prefix. Use this to define default values for shell command parameters.
+#   For example, if one were to define the macro MY_DELAY with the command
+#   "sleep {DELAY}" along with "default_parameter_DELAY = 50" then the
+#   command "MY_DELAY" would evaluate to "sleep 50". To override the
+#   default parameter when calling the command then using
+#   "MY_DELAY DELAY=30" would evaluate to "sleep 30". The default is
+#   to require that all parameters used in the command macro be
+#   present in the command invoking the macro.
+#variable_<name>:
+#   One may specify any number of options with a "variable_" prefix.
+#   The given variable name will be assigned the given value (parsed
+#   as a Python literal) and will be available during macro expansion.
+#   For example, a config with "variable_fan_speed = 75" might have
+#   shell commands containing "echo { fan_speed * 255 }". Variables
+#   can be changed at run-time using the SET_GCODE_VARIABLE in a
+#   gcode_maco or console command (see docs/Command_Templates.md for
+#   details). Variable names may not use upper case characters.
+#rename_existing:
+#   This option will cause the shell exec macro to override an existing G-Code
+#   command and provide the previous definition of the command via the
+#   name provided here. This can be used to override builtin G-Code
+#   commands. Care should be taken when overriding commands as it can
+#   cause complex and unexpected results. The default is to not
+#   override an existing G-Code command.
+```
+
 ## [save_variables]
 
 Support saving variables to disk so that they are retained across
